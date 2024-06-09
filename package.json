@@ -1,0 +1,11 @@
+{
+  "name": "max-text-editor",
+  "version": "1.0.0",
+  "description": "A real-time collaborative text editor that allows multiple users to simultaneously edit a document. The editor should provide a seamless and responsive editing experience, handling concurrent updates and maintaining document consistency.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Adewale Balogun",
+  "license": "ISC"
+}

@@ -51,6 +51,46 @@ const docs = new Map();
 
     io.on('connection', (socket) => {
        
+        socket.on('join-document', async (documentId) => {
+
+            if (!docs.has(documentId)) {
+              const ydoc = new Y.Doc();
+              docs.set(documentId, ydoc);
+        
+              const documentsService = diContainer.resolve('documentsService');
+  
+              const doc = await documentsService.getDocumentById(documentId);
+  
+              if (doc) {
+                Y.applyUpdate(ydoc, Uint8Array.from(doc.content.data));
+              }
+  
+            }
+        
+            const ydoc = docs.get(documentId);
+            const provider = new WebsocketProvider(`ws://${config.server.host}:${config.server.port}`, documentId, ydoc);
+            const ytext = ydoc.getText('document');
+        
+            socket.join(documentId);
+        
+            socket.emit('document', ytext.toString());
+        
+            socket.on('edit-document', async (content) => {
+              ytext.delete(0, ytext.length);
+              ytext.insert(0, content);
+        
+              const update = Y.encodeStateAsUpdate(ydoc);
+              ydoc.applyUpdate(update);
+        
+              const documentsService = diContainer.resolve('documentsService');
+              await documentsService.updateDocumentById(documentId, update);
+  
+              io.to(documentId).emit('document', ytext.toString());
+  
+            });
+            
+          });
+          
     });
 
 })();

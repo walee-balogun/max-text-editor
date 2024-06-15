@@ -4,17 +4,22 @@
   "description": "A real-time collaborative text editor that allows multiple users to simultaneously edit a document. The editor should provide a seamless and responsive editing experience, handling concurrent updates and maintaining document consistency.",
   "main": "app.js",
   "scripts": {
+    "start": "ENV=development node app.js",
+    "start:local": "ENV=local node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Adewale Balogun",
   "license": "ISC",
   "dependencies": {
+    "awilix": "^10.0.2",
     "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "express-validator": "^7.1.0",
     "lodash": "^4.17.21",
     "mongodb": "^6.7.0",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "yjs": "^13.6.16"
   }
 }

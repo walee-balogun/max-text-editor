@@ -8,7 +8,10 @@ dotenv.config({ path: ['.env.local', '.env'] });
 const config = require('./config');
 console.log(process.env); // remove this after you've confirmed it is working
 const routes = require('./src/routes');
-const { ObjectId } = require('mongodb');
+const socketIo = require('socket.io');
+const { WebsocketProvider } = require('y-websocket');
+
+const docs = new Map();
 
 (async () => {
     const app = express();
@@ -37,19 +40,6 @@ const { ObjectId } = require('mongodb');
     const documentsRoutes = diContainer.resolve('documentsRoutes');
     app.use('/api/documents', documentsRoutes);
 
-    const documentsController = diContainer.resolve('documentsController');
-
-    console.log('--- documentsController ---');
-    console.log(documentsController);
-
-    const documentsService = diContainer.resolve('documentsService');
-
-    console.log('--- documentsService ---');
-    console.log(documentsService);
-
-    /* const docId = "12343355555"
-    const document = await this.documentsService.getDocumentById(docId);
- */
     const server = http.createServer(app);
     server.listen(config.server.port, () => {
         console.log(`${config.app.name} is running`);
@@ -57,7 +47,48 @@ const { ObjectId } = require('mongodb');
         console.log(`   environment: ${config.server.env.toLowerCase()}`);
     });
 
+    const io = socketIo(server);
 
+    io.on('connection', (socket) => {
+        socket.on('join-document', async (documentId) => {
+
+          if (!docs.has(documentId)) {
+            const ydoc = new Y.Doc();
+            docs.set(documentId, ydoc);
+      
+            const documentsService = diContainer.resolve('documentsService');
+
+            const doc = await documentsService.getDocumentById(documentId);
+
+            if (doc) {
+              Y.applyUpdate(ydoc, Uint8Array.from(doc.content.data));
+            }
+
+          }
+      
+          const ydoc = docs.get(documentId);
+          const provider = new WebsocketProvider(`ws://${config.server.host}:${config.server.port}`, documentId, ydoc);
+          const ytext = ydoc.getText('document');
+      
+          socket.join(documentId);
+      
+          socket.emit('document', ytext.toString());
+      
+          socket.on('edit-document', async (content) => {
+            ytext.delete(0, ytext.length);
+            ytext.insert(0, content);
+      
+            const update = Y.encodeStateAsUpdate(ydoc);
+            ydoc.applyUpdate(update);
+      
+            const documentsService = diContainer.resolve('documentsService');
+            await documentsService.updateDocumentById(documentId, update);
+
+            io.to(documentId).emit('document', ytext.toString());
+
+          });
+        });
+      });
 
 })();
 

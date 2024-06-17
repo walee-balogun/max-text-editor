@@ -10,6 +10,7 @@ console.log(process.env); // remove this after you've confirmed it is working
 const routes = require('./src/routes');
 const socketIo = require('socket.io');
 const { WebsocketProvider } = require('y-websocket');
+const authRouter = require('./src/routes/auth.routes');
 
 const docs = new Map();
 
@@ -36,6 +37,9 @@ const docs = new Map();
     const diContainer = di.init({ mongoDb, app, config });
 
     //routes.init({ diContainer });
+
+    const authRoutes = diContainer.resolve('authRoutes');
+    app.use('/api/auth', authRoutes);
 
     const documentsRoutes = diContainer.resolve('documentsRoutes');
     app.use('/api/documents', documentsRoutes);
@@ -88,7 +92,7 @@ const docs = new Map();
               io.to(documentId).emit('document', ytext.toString());
   
             });
-            
+
           });
           
     });

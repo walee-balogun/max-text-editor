@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collaborative Text Editor</title>
+  <style>
+    #editor {
+      width: 100%;
+      height: 500px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <button id="undo">Undo</button>
+  <button id="redo">Redo</button>
+  <div id="editor" contenteditable="true"></div>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script src="https://unpkg.com/yjs"></script>
+  <script>
+    const socket = io('http://localhost:3003');
+    const ydoc = new Y.Doc();
+    const ytext = ydoc.getText('document');
+    const editor = document.getElementById('editor');
+    const undoManager = new Y.UndoManager(ytext);
+
+    socket.emit('join-document', '1'); // Example document ID
+
+    socket.on('document', (content) => {
+      ytext.delete(0, ytext.length);
+      ytext.insert(0, content);
+      editor.innerHTML = content;
+    });
+
+    ytext.observe(event => {
+      editor.innerHTML = ytext.toString();
+    });
+
+    editor.addEventListener('input', () => {
+      const content = editor.innerHTML;
+      ytext.delete(0, ytext.length);
+      ytext.insert(0,
+      content);
+      socket.emit('edit-document', content);
+    });
+
+    document.getElementById('undo').addEventListener('click', () => {
+      undoManager.undo();
+    });
+
+    document.getElementById('redo').addEventListener('click', () => {
+      undoManager.redo();
+    });
+  </script>
+</body>
+</html>

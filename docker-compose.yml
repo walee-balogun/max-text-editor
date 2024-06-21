@@ -1,0 +1,49 @@
+version: '3.8'
+services:
+  db:
+    container_name: mongodb
+    image: mongo:7
+    ports:
+      - "27019:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=wale
+      - MONGO_INITDB_ROOT_PASSWORD=Password
+      #MONGO_INITDB_DATABASE: max-text-editor
+    volumes:
+      - mongo_data:/data/db
+    #command: ["mongod", "--auth", --bind_ip_all"]
+    networks:
+      - my_net
+  app:
+    container_name: web-app
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    environment:
+      - ENV=development
+      - APP_NAME=Max Text Editor
+      #- HOST=127.0.0.1
+      - HOST_NAME=localhost
+      - PORT=3000
+      - MONGO_DB_HOST=db
+      #- MONGO_DB_HOST_NAME=db
+      - MONGO_DB_PORT=27017
+      - MONGO_DB_USERNAME=wale
+      - MONGO_DB_PASSWORD=Password
+      - MONGO_DB_DB_NAME=max-text-editor
+    depends_on:
+      - db
+    networks:
+      - my_net
+  
+networks:
+  my_net:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local

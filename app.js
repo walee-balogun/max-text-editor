@@ -6,7 +6,6 @@ const di = require('./src/di/di');
 const dotenv = require('dotenv');
 dotenv.config({ path: ['.env.local', '.env'] });
 const config = require('./config');
-console.log(process.env); // remove this after you've confirmed it is working
 const routes = require('./src/routes');
 const socketIo = require('socket.io');
 const { WebsocketProvider } = require('y-websocket');

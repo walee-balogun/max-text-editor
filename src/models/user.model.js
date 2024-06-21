@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 class UserModel {
   constructor({ _id, firstName, lastName, email, username, password }) {

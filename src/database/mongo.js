@@ -15,8 +15,8 @@ const getMongoURL = (config) => {
         return `mongodb://${host}:${port}/${dbName}`;
     }
 
-    const uri = `mongodb://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${hostname}/${dbName}?retryWrites=true&w=majority`;
-
+    const uri = `mongodb://${encodeURIComponent(username)}:${encodeURIComponent(password)}@${host}:${port}/${dbName}?authSource=admin`;
+    //const uri = `mongodb://${host}:${port}/${dbName}?retryWrites=true&w=majority`;
     console.log('uri: ', uri);
     return uri;
 
